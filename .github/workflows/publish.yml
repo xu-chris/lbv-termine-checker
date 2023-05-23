@@ -21,7 +21,7 @@ jobs:
 
       - name: Get SemVer
         id: semver
-        uses: actions-semver/semver@v0.5.0
+        uses: heyvito/semver-releaser@v0.0.10
         with:
           version: '1.0.0'
           bump: minor
