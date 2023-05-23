@@ -17,7 +17,8 @@ function runCypressTest() {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`Cypress-Test fehlgeschlagen mit Exit-Code ${code}`));
+        console.error(`Cypress-Test fehlgeschlagen mit Exit-Code ${code}`);
+        resolve(); // Fortsetzen des Skripts trotz Fehler
       }
     });
   });
@@ -51,7 +52,7 @@ async function checkWebpage() {
         sendTelegramNotification(date);
       }
     } catch (error) {
-      console.error('Fehler beim Ausführen des Cypress-Tests:', error);
+      console.error('Fehler beim Ausführen des Datum-Tests:', error);
     }
   }
 
