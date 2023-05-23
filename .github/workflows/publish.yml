@@ -21,6 +21,7 @@ jobs:
       tag: ${{ steps.tag_version.outputs.new_tag }}
       name: ${{ steps.tag_version.outputs.new_tag }}
       body: ${{ steps.tag_version.outputs.changelog }}
+      label: ${{ steps.tag_version.outputs.release_type }}
     steps:
       - name: Create new tag
         id: tag_version
@@ -64,7 +65,7 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.create_metadata.outputs.tag }}
-          labels: ${{ needs.create_metadata.outputs.tag }}
+          labels: ${{ needs.create_metadata.outputs.label }}
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -74,6 +75,8 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          labels: ${{ needs.create_metadata.outputs.label }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
