@@ -1,6 +1,6 @@
 # Automate checking of available LBV Hamburg dates
 
-If you're living in Hamburg, Germany, you know that even (Elon Musk doesn't like the waiting times)[https://www.electrive.com/2019/07/17/not-everybody-tolerates-creaky-german-bureaucracy/] of it's bureaucracy. Therefore, smart tech needs to come to rescue to get a date as early as it gets free.
+If you're living in Hamburg, Germany, you know that even [Elon Musk doesn't like the waiting times](https://www.electrive.com/2019/07/17/not-everybody-tolerates-creaky-german-bureaucracy/) of it's bureaucracy. Therefore, smart tech needs to come to rescue to get a date as early as it gets free.
 
 This repo initiates an automatic check for free dates and sends a Telegram message to you through your (previously generated) Telegram bot. The whole setup is dockerized for your convenience 🍷.
 
