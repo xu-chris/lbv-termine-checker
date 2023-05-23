@@ -9,27 +9,75 @@ on:
       - main
 
 jobs:
-  build-and-push:
+
+  create_metadata:
+    name: Create Metadata
     runs-on: ubuntu-latest
-
+    outputs:
+      tag: ${{ steps.tag_version.outputs.new_tag }}
+      name: ${{ steps.tag_version.outputs.new_tag }}
+      body: ${{ steps.tag_version.outputs.changelog }}
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
+      - name: Create new tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: v
+          release_branches: ['master','main']
+        
+  push_to_github:
+    name: Push Docker image to GitHub Packages
+    needs: create_metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-
-      - name: Get SemVer
-        id: semver
-        uses: heyvito/semver-releaser@v0.0.10
+      - name: Cache Docker layers
+        uses: actions/cache@v3.0.11
         with:
-          version: '1.0.0'
-          bump: minor
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ghcr.io/${{ github.repository }}:${{ needs.create_metadata.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build and push latest
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ghcr.io/${{ github.repository }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Configure GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Build and Push Docker Image
-        run: |
-          docker buildx create --use
-          docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/${{ github.repository }}:latest -t ghcr.io/${{ github.repository }}:${{ steps.semver.outputs.version }} --push .
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: 
+      - create_metadata
+      - push_to_github
+    steps:
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ needs.create_metadata.outputs.tag }}
+          name: Release ${{ needs.create_metadata.outputs.name }}
+          body: ${{ needs.create_metadata.outputs.body }}
