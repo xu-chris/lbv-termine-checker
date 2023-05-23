@@ -92,4 +92,5 @@ jobs:
         with:
           tag: ${{ needs.create_metadata.outputs.tag }}
           name: Release ${{ needs.create_metadata.outputs.name }}
-          body: ${{ needs.create_metadata.outputs.body }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          label: ${{ steps.tag_version.outputs.release_type }}
