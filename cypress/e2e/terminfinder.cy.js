@@ -1,53 +1,50 @@
-describe('Webseite-Test', () => {
-    it('überprüft Veränderungen auf der Webseite', () => {
-      cy.visit('https://lbv-termine.de/frontend/standortauswahl.php')
-  
-      // Checkbox auswählen und anklicken
-      cy.get('#datenschutzcheckbox').click()
-  
-      // Weiter-Button auswählen und klicken
-      cy.get('.LBV-weiterbutton').click()
+describe('Website Test', () => {
+  it('checks for changes on the website', () => {
+    cy.visit('https://lbv-termine.de/frontend/standortauswahl.php')
 
-      // Wait for the page to change
-      cy.url().should('include', '/kontaktdaten.php');
-  
-      // Formularfelder ausfüllen
-      cy.get('#vorname').clear().type('Your')
-      cy.get('#nachname').clear().type('Name')
-      cy.get('#email').clear().type('peter.tschentscher@doesntlikeelon.com')
-  
-      // Weiter-Button erneut auswählen und klicken
-      cy.get('.LBV-weiterbutton').click()
+    // Select and click the checkbox
+    cy.get('#datenschutzcheckbox').click()
 
-      // Wait for the page to change
-      cy.url().should('include', '/standortauswahl.php');
-  
-      // Datum der frühesten verfügbaren Option finden
-      try {
-        cy.get('.card-body')
-          .should('exist')
-          .each(($cardBody) => {
-            cy.wrap($cardBody)
-              .should('contain', 'verfügbar ab')
-              .invoke('text')
-              .then((dateText) => {
-                const date = dateText.match(/\d{2}\.\d{2}\.\d{4}/)[0]
-                cy.wrap(date).as('date')
-              })
-          })
-    
-        // Das Datum speichern und mit einem vorherigen Datum vergleichen
-        cy.get('@date').then((date) => {
-          const previousDate = Cypress.moment(localStorage.getItem('previousDate'), 'DD.MM.YYYY')
-          if (!previousDate.isValid() || Cypress.moment(date, 'DD.MM.YYYY').isAfter(previousDate)) {
-            localStorage.setItem('previousDate', date)
-            // Benachrichtigung über Telegram-Bot senden (implementiere dies entsprechend deinen Anforderungen)
-            // sendTelegramNotification(date)
-          }
+    // Select and click the "Weiter" button
+    cy.get('.LBV-weiterbutton').click()
+
+    // Wait for the page to change
+    cy.url().should('include', '/kontaktdaten.php');
+
+    // Fill in the form fields
+    cy.get('#vorname').clear().type('Your')
+    cy.get('#nachname').clear().type('Name')
+    cy.get('#email').clear().type('peter.tschentscher@doesntlikeelon.com')
+
+    // Select and click the "Weiter" button again
+    cy.get('.LBV-weiterbutton').click()
+
+    // Wait for the page to change
+    cy.url().should('include', '/standortauswahl.php');
+
+    // Find the date of the earliest available option
+    try {
+      cy.get('.card-body')
+        .should('exist')
+        .each(($cardBody) => {
+          cy.wrap($cardBody)
+            .should('contain', 'verfügbar ab')
+            .invoke('text')
+            .then((dateText) => {
+              const date = dateText.match(/\d{2}\.\d{2}\.\d{4}/)[0]
+              cy.wrap(date).as('date')
+            })
         })
-      } catch {
-        return false;
-      }
-    })
-  })
   
+      // Save the date and compare it with a previous date
+      cy.get('@date').then((date) => {
+        const previousDate = Cypress.moment(localStorage.getItem('previousDate'), 'DD.MM.YYYY')
+        if (!previousDate.isValid() || Cypress.moment(date, 'DD.MM.YYYY').isAfter(previousDate)) {
+          localStorage.setItem('previousDate', date)
+        }
+      })
+    } catch {
+      return false;
+    }
+  })
+})
