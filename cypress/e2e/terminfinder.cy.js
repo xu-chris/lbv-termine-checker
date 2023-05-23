@@ -12,9 +12,9 @@ describe('Webseite-Test', () => {
       cy.url().should('include', '/kontaktdaten.php');
   
       // Formularfelder ausfüllen
-      cy.get('#vorname').clear().type('Nana')
-      cy.get('#nachname').clear().type('Xu')
-      cy.get('#email').clear().type('pm@nanaxu.me')
+      cy.get('#vorname').clear().type('Your')
+      cy.get('#nachname').clear().type('Name')
+      cy.get('#email').clear().type('peter.tschentscher@doesntlikeelon.com')
   
       // Weiter-Button erneut auswählen und klicken
       cy.get('.LBV-weiterbutton').click()
